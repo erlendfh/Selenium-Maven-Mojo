@@ -37,7 +37,7 @@ import org.openqa.selenium.server.htmlrunner.HTMLLauncher
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  */
 class SeleneseMojo
-    extends GroovyMojo
+    extends AbstractServerMojo
 {
     /**
      * The suite file to run.
@@ -109,7 +109,7 @@ class SeleneseMojo
      * @parameter expression="${maven.test.skip}" default-value="false"
      */
     boolean skip
-    
+
     //
     // Components
     //
@@ -130,6 +130,8 @@ class SeleneseMojo
             log.info('Skipping tests')
             return
         }
+
+        ant.mkdir(dir: workingDirectory)
         
         // Setup the default results file if not specified
         if (!results) {
@@ -146,9 +148,10 @@ class SeleneseMojo
         def conf = new RemoteControlConfiguration()
         conf.port = port
         conf.singleWindow = !multiWindow
+				conf.userExtensions = createUserExtensionsFile()
 
         def server = new SeleniumServer(slowResources, conf)
-        server.start()
+        server.boot()
         
         def result = 'FAILED'
         try {
